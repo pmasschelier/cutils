@@ -28,6 +28,6 @@ test('array_list', test_exe)
 
 # Make this library usable as a Meson subproject.
 cutils_dep = declare_dependency(
-  include_directories: include_directories('.'),
+  include_directories: 'include',
   link_with : lib)
 
