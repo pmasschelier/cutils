@@ -14,3 +14,13 @@ depth = 1
 [provide]
 cutils = cutils_dep
 ```
+
+Then add this in you meson.build:
+
+```
+cutils = dependency('cutils')
+
+executable(exe_name,
+           src,
+           dependencies: [cutils])
+```

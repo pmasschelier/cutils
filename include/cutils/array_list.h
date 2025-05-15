@@ -171,27 +171,10 @@ bool array_list_swap_and_pop_back(array_list_t *array, unsigned int i,
 #include <stdlib.h>
 #include <string.h>
 
-array_list_t *array_list_create(unsigned size_bytes) {
-  when_true_ret(size_bytes == 0, NULL);
-  array_list_t *ret = malloc(sizeof(array_list_t));
-  ret->size_bytes = size_bytes;
-  ret->size = 0;
-  ret->capacity = 0;
-  ret->data = NULL;
-  return ret;
-}
-
-void array_list_free(array_list_t *array) {
-  free(array->data);
-  free(array);
-}
-
-void array_list_init(array_list_t *array, unsigned size_bytes) {
-  array->capacity = 0;
-  array->size = 0;
-  array->size_bytes = size_bytes;
-  array->data = NULL;
-}
+#define array_list_init(type)                                                  \
+  (array_list_t) {                                                             \
+    .data = NULL, .capacity = 0, .size = 0, .size_bytes = sizeof(type)         \
+  }
 
 void array_list_deinit(array_list_t *array) {
   array->capacity = 0;
