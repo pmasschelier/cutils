@@ -2,8 +2,7 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-  array_list_t a1;
-  array_list_init(&a1, sizeof(int));
+  array_list_t a1 = array_list_init(int);
   for (int i = 0; i < 4925; i++) {
     array_list_push_back(&a1, &i);
   }
