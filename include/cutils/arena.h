@@ -1,73 +1,104 @@
-#ifndef ARENA_H
-#define ARENA_H
+#ifndef CUTILS_ARENA_H
+#define CUTILS_ARENA_H
 
 #include <cutils/when_macros.h>
+#include <cutils/allocator.h>
 #include <stddef.h>
-#include <stdint.h>
+
+#ifndef CUTILS_ARENA_SIZE_TYPE
+#define CUTILS_ARENA_SIZE_TYPE unsigned
+#endif
+
+#ifdef CUTILS_ARENA_DYNAMIC
+#if !defined(CUTILS_ARENA_realloc) || !defined(CUTILS_ARENA_malloc)
 #include <stdlib.h>
+#endif
+#ifndef CUTILS_ARENA_malloc
+#define CUTILS_ARENA_malloc malloc
+#endif
+#ifndef CUTILS_ARENA_realloc
+#define CUTILS_ARENA_realloc realloc
+#endif
+#endif
 
-typedef struct allocator allocator_t;
-
-typedef void *(*alloc_fn_t)(allocator_t *, size_t);
-typedef void (*dealloc_fn_t)(allocator_t *, void *);
-
-struct allocator {
-  alloc_fn_t alloc;
-  dealloc_fn_t dealloc;
-};
-
-struct arena {
-  allocator_t allocator;
-  void *memory;
-  size_t capacity;
-  size_t size;
-};
+typedef CUTILS_ARENA_SIZE_TYPE arena_size_t;
 
 typedef struct arena arena_t;
 
+struct arena {
+  char *memory;
+  arena_size_t capacity;
+  arena_size_t size;
+};
+
 extern size_t MINIMUM_ARENA_CAPACITY;
 
-int arena_init(arena_t *arena);
-
-void *arena_alloc(arena_t *arena, size_t size);
-
-void arena_free(arena_t *arena);
-
-// IMPLEMENTATION
-
-size_t MINIMUM_ARENA_CAPACITY = 1024;
-
-void dealloc_nop(allocator_t *, void *) {}
-
-int arena_init(arena_t *arena) {
-  arena->allocator.alloc = (alloc_fn_t)arena_alloc;
-  arena->allocator.dealloc = dealloc_nop;
+static void arena_reset(arena_t* arena) {
   arena->size = 0;
-  arena->memory = NULL;
-  arena->capacity = 0;
-  return 0;
 }
 
-void *arena_alloc(arena_t *arena, size_t size) {
-  void *ret;
-  when_null_ret(arena, NULL);
-  if (arena->size + size > arena->capacity) {
-    size_t capacity = 2 * (arena->size + size);
-    if (capacity < MINIMUM_ARENA_CAPACITY)
-      capacity = MINIMUM_ARENA_CAPACITY;
-    arena->memory = realloc(arena->memory, capacity);
-    arena->capacity = capacity;
-  }
-  ret = (uint8_t *)arena->memory + arena->size;
-  arena->size += size;
-  return ret;
+static arena_size_t arena_push_frame(const arena_t* arena) {
+  return arena->size;
+}
+static void arena_pop_frame(arena_t* arena, const arena_size_t frame) {
+  arena->size = frame;
 }
 
-void arena_free(arena_t *arena) {
+#define ARENA_NEXT_ALLOC_ALIGNED(nextAlloc, align) ((nextAlloc) + ((align) - ((nextAlloc) % (align))))
+
+#ifdef CUTILS_ARENA_DYNAMIC
+static arena_t arena_init(arena_size_t capacity) {
+  void* memory = CUTILS_ARENA_malloc(capacity);
+  if (memory == nullptr) capacity = 0;
+  return (arena_t){.memory = memory, .capacity = capacity, .size = 0};
+}
+
+static void arena_free(arena_t* arena) {
   free(arena->memory);
-  arena->memory = NULL;
-  arena->size = 0;
-  arena->capacity = 0;
+  *arena = (arena_t) {
+    .memory = nullptr,
+    .capacity = 0,
+    .size = 0
+    };
 }
 
-#endif // !ARENA_H
+static void *arena_allocate(arena_t *arena, const size_t size) {
+  const arena_size_t nextAllocOffset = ARENA_NEXT_ALLOC_ALIGNED(arena->size, 64);
+  const size_t minCapacity = nextAllocOffset + size;
+  if (arena->capacity < minCapacity) {
+    void* memory = CUTILS_ARENA_realloc(arena->memory, 2 * minCapacity);
+    when_null_ret(memory, nullptr);
+    if (memory == nullptr) return nullptr;
+    arena->memory = memory;
+    arena->capacity = 2 * minCapacity;
+  }
+  arena->size = minCapacity;
+  return arena->memory + nextAllocOffset;
+}
+#else
+static arena_t arena_init(void *memory, arena_size_t capacity) {
+  return (arena_t){.memory = (char *)memory, .capacity = capacity, .size = 0};
+}
+
+static void arena_free(arena_t* arena) {
+  *arena = (arena_t) {
+    .memory = nullptr,
+    .capacity = 0,
+    .size = 0
+    };
+}
+
+static void *arena_allocate(arena_t *arena, size_t size) {
+  const arena_size_t nextAllocOffset = ARENA_NEXT_ALLOC_ALIGNED(arena->size, 64);
+  const size_t minCapacity = nextAllocOffset + size;
+  when_true_ret(arena->capacity < minCapacity, nullptr);
+  arena->size = nextAllocOffset + size;
+  return arena->memory + nextAllocOffset;
+}
+#endif
+
+[[maybe_unused]] static allocator_t arena_allocator(arena_t* arena) {
+  return ALLOCATOR_INIT_METADATA(arena, (alloc_md_fn_t)arena_allocate, nullptr, nullptr);
+}
+
+#endif // !CUTILS_ARENA_H
