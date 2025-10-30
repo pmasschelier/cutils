@@ -62,8 +62,9 @@
             array->data = memory;                                               \
             array->capacity *= 2;                                               \
         }                                                                       \
+        const type* ret = &array->data[array->length];                          \
         array->length += count;                                                 \
-        return &array->data[array->length - 1];                                 \
+        return ret;                                                             \
     }                                                                           \
                                                                                 \
     [[maybe_unused]] static bool array_pop_ ## type(                            \
