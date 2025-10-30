@@ -23,6 +23,6 @@
 #define when_null_ret(ptr, ...) when_true_ret(ptr == NULL, __VA_ARGS__)
 
 #define when_false_jmp(boolean, ...) when_true_jmp(!(boolean), __VA_ARGS__)
-#define when_null_jmp(ptr, ...) when_true_jmp(ptr == NULL, __VA_ARGS__)
+#define when_NULL_jmp(ptr, ...) when_true_jmp(ptr == NULL, __VA_ARGS__)
 
 #endif	// !TEST_MACROS_H
