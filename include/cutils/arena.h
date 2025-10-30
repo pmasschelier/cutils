@@ -33,28 +33,33 @@ struct arena {
 
 extern size_t MINIMUM_ARENA_CAPACITY;
 
-[[maybe_unused]] static void arena_reset(arena_t* arena) {
+[[maybe_unused]]
+static void arena_reset(arena_t* arena) {
   arena->size = 0;
 }
 
-[[maybe_unused]] static arena_size_t arena_push_frame(const arena_t* arena) {
+[[maybe_unused]]
+static arena_size_t arena_push_frame(const arena_t* arena) {
   return arena->size;
 }
 
-[[maybe_unused]] static void arena_pop_frame(arena_t* arena, const arena_size_t frame) {
+[[maybe_unused]]
+static void arena_pop_frame(arena_t* arena, const arena_size_t frame) {
   arena->size = frame;
 }
 
 #define ARENA_NEXT_ALLOC_ALIGNED(nextAlloc, align) ((nextAlloc) + ((align) - ((nextAlloc) % (align))))
 
 #ifdef CUTILS_ARENA_DYNAMIC
-[[maybe_unused]] static arena_t arena_init(arena_size_t capacity) {
+[[maybe_unused]]
+static arena_t arena_init(arena_size_t capacity) {
   void* memory = CUTILS_ARENA_malloc(capacity);
   if (memory == nullptr) capacity = 0;
   return (arena_t){.memory = memory, .capacity = capacity, .size = 0};
 }
 
-[[maybe_unused]] static void arena_free(arena_t* arena) {
+[[maybe_unused]]
+static void arena_free(arena_t* arena) {
   free(arena->memory);
   *arena = (arena_t) {
     .memory = nullptr,
@@ -63,7 +68,8 @@ extern size_t MINIMUM_ARENA_CAPACITY;
     };
 }
 
-[[maybe_unused]] static void *arena_allocate(arena_t *arena, const size_t size) {
+[[maybe_unused]] [[nodiscard]]
+static void *arena_allocate(arena_t *arena, const size_t size) {
   const arena_size_t nextAllocOffset = ARENA_NEXT_ALLOC_ALIGNED(arena->size, 64);
   const size_t minCapacity = nextAllocOffset + size;
   if (arena->capacity < minCapacity) {
@@ -77,11 +83,13 @@ extern size_t MINIMUM_ARENA_CAPACITY;
   return arena->memory + nextAllocOffset;
 }
 #else
-[[maybe_unused]] static arena_t arena_init(void *memory, arena_size_t capacity) {
+[[maybe_unused]]
+static arena_t arena_init(void *memory, arena_size_t capacity) {
   return (arena_t){.memory = (char *)memory, .capacity = capacity, .size = 0};
 }
 
-[[maybe_unused]] static void arena_free(arena_t* arena) {
+[[maybe_unused]]
+static void arena_free(arena_t* arena) {
   *arena = (arena_t) {
     .memory = nullptr,
     .capacity = 0,
@@ -89,7 +97,8 @@ extern size_t MINIMUM_ARENA_CAPACITY;
     };
 }
 
-[[maybe_unused]] static void *arena_allocate(arena_t *arena, size_t size) {
+[[maybe_unused]] [[nodiscard]]
+static void *arena_allocate(arena_t *arena, size_t size) {
   const arena_size_t nextAllocOffset = ARENA_NEXT_ALLOC_ALIGNED(arena->size, 64);
   const size_t minCapacity = nextAllocOffset + size;
   if(arena->capacity < minCapacity)
@@ -99,7 +108,8 @@ extern size_t MINIMUM_ARENA_CAPACITY;
 }
 #endif
 
-[[maybe_unused]] static allocator_t arena_allocator(arena_t* arena) {
+[[maybe_unused]]
+static allocator_t arena_allocator(arena_t* arena) {
   return ALLOCATOR_INIT_METADATA(arena, (alloc_md_fn_t)arena_allocate, nullptr, nullptr);
 }
 
