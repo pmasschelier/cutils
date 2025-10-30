@@ -168,6 +168,8 @@ bool array_list_swap_and_pop_back(array_list_t *array, unsigned int i,
 
 // IMPLEMENTATION
 
+#ifdef CUTILS_ARRAY_LIST_IMPL
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -270,6 +272,8 @@ bool array_list_swap_and_pop_back(array_list_t *array, unsigned i,
   when_false_ret(-ERROR_NO_ERROR == ret, FALSE);
   return array_list_pop_back(array, value);
 }
+
+#endif
 
 /** @} */
 

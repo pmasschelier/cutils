@@ -1,2 +1,5 @@
 .cache
-
+.idea
+subprojects/*
+!subprojects/packagefiles/
+!subprojects/libtap.wrap

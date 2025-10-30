@@ -6,28 +6,9 @@ project('cutils', 'c',
   ]
 )
 
-src = files(
-  'include/cutils/arena.h'
-)
-
-lib_args = ['-DBUILDING_CUTILS']
-
-lib = static_library('cutils', src,
-  install : false,
-  c_args : lib_args,
-  gnu_symbol_visibility : 'hidden',
-  include_directories: 'include'
-)
-
-test_exe = executable('arena_test', 'test/test_arena.c',
-  link_with : lib, include_directories: 'include')
-test('arena', test_exe)
-test_exe = executable('array_list_test', 'test/test_array_list.c',
-  link_with : lib, include_directories: 'include')
-test('array_list', test_exe)
-
 # Make this library usable as a Meson subproject.
-cutils_dep = declare_dependency(
-  include_directories: 'include',
-  link_with : lib)
+cutils_dep = declare_dependency(include_directories: 'include')
 
+if not meson.is_subproject()
+  subdir('test')
+endif
