@@ -1,7 +1,7 @@
 #ifndef CUTILS_ALLOCATOR_H
 #define CUTILS_ALLOCATOR_H
 
-#include <stdint.h>
+#include <stddef.h>
 
 typedef void *(*alloc_fn_t)(size_t size);
 typedef void *(*realloc_fn_t)(void* buffer, size_t size);
