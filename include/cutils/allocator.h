@@ -40,24 +40,24 @@ struct allocator {
 #endif
 
 UNUSED
-static void* AllocatorAlloc(const allocator_t allocator, const size_t size) {
-    if (allocator.metadata)
-        return allocator.md.alloc(allocator.metadata, size);
-    return allocator.no_md.alloc(size);
+static void* AllocatorAlloc(const allocator_t* allocator, const size_t size) {
+    if (allocator->metadata)
+        return allocator->md.alloc(allocator->metadata, size);
+    return allocator->no_md.alloc(size);
 }
 
 UNUSED
-static void* AllocatorRealloc(const allocator_t allocator, void* buffer, const size_t size) {
-    if (allocator.metadata)
-        return allocator.md.realloc(allocator.metadata, buffer, size);
-    return allocator.no_md.realloc(buffer, size);
+static void* AllocatorRealloc(const allocator_t* allocator, void* buffer, const size_t size) {
+    if (allocator->metadata)
+        return allocator->md.realloc(allocator->metadata, buffer, size);
+    return allocator->no_md.realloc(buffer, size);
 }
+
 UNUSED
-UNUSED
-static void AllocatorDealloc(const allocator_t allocator, void* buffer) {
-    if (allocator.metadata)
-        allocator.md.dealloc(allocator.metadata, buffer);
-    else allocator.no_md.dealloc(buffer);
+static void AllocatorDealloc(const allocator_t* allocator, void* buffer) {
+    if (allocator->metadata)
+        allocator->md.dealloc(allocator->metadata, buffer);
+    else allocator->no_md.dealloc(buffer);
 }
 
 #endif //CUTILS_ALLOCATOR_H
