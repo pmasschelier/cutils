@@ -3,22 +3,9 @@
 
 #include <cutils/when_macros.h>
 #include <cutils/allocator.h>
-#include <stddef.h>
 
 #ifndef CUTILS_ARENA_SIZE_TYPE
 #define CUTILS_ARENA_SIZE_TYPE unsigned
-#endif
-
-#ifdef CUTILS_ARENA_DYNAMIC
-#if !defined(CUTILS_ARENA_realloc) || !defined(CUTILS_ARENA_malloc)
-#include <stdlib.h>
-#endif
-#ifndef CUTILS_ARENA_malloc
-#define CUTILS_ARENA_malloc malloc
-#endif
-#ifndef CUTILS_ARENA_realloc
-#define CUTILS_ARENA_realloc realloc
-#endif
 #endif
 
 typedef CUTILS_ARENA_SIZE_TYPE arena_size_t;
@@ -51,16 +38,21 @@ static void arena_pop_frame(arena_t* arena, const arena_size_t frame) {
 #define ARENA_NEXT_ALLOC_ALIGNED(nextAlloc, align) ((nextAlloc) + ((align) - ((nextAlloc) % (align))))
 
 #ifdef CUTILS_ARENA_DYNAMIC
+
+#if defined(CUTILS_NO_STD) && !(defined(CUTILS_malloc) && defined(CUTILS_realloc) && defined(CUTILS_dealloc))
+#error "When the CUTILS_NO_STD and CUTILS_ARENA_DYNAMIC are defined, CUTILS_malloc, CUTILS_realloc and CUTILS_dealloc should be provided"
+#endif
+
 [[maybe_unused]]
 static arena_t arena_init(arena_size_t capacity) {
-  void* memory = CUTILS_ARENA_malloc(capacity);
+  void* memory = CUTILS_malloc(capacity);
   if (memory == nullptr) capacity = 0;
   return (arena_t){.memory = memory, .capacity = capacity, .size = 0};
 }
 
 [[maybe_unused]]
 static void arena_free(arena_t* arena) {
-  free(arena->memory);
+  CUTILS_free(arena->memory);
   *arena = (arena_t) {
     .memory = nullptr,
     .capacity = 0,
@@ -73,7 +65,7 @@ static void *arena_allocate(arena_t *arena, const size_t size) {
   const arena_size_t nextAllocOffset = ARENA_NEXT_ALLOC_ALIGNED(arena->size, 64);
   const size_t minCapacity = nextAllocOffset + size;
   if (arena->capacity < minCapacity) {
-    void* memory = CUTILS_ARENA_realloc(arena->memory, 2 * minCapacity);
+    void* memory = CUTILS_realloc(arena->memory, 2 * minCapacity);
     when_null_ret(memory, nullptr);
     if (memory == nullptr) return nullptr;
     arena->memory = memory;

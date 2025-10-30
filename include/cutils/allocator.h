@@ -1,18 +1,7 @@
 #ifndef CUTILS_ALLOCATOR_H
 #define CUTILS_ALLOCATOR_H
 
-#if !defined(CUTILS_ALLOCATOR_alloc) || !defined(CUTILS_ALLOCATOR_realloc) || !defined(CUTILS_ALLOCATOR_dealloc)
-#include <stdlib.h>
-#endif
-#ifndef CUTILS_ALLOCATOR_alloc
-#define CUTILS_ALLOCATOR_alloc malloc
-#endif
-#ifndef CUTILS_ALLOCATOR_realloc
-#define CUTILS_ALLOCATOR_realloc realloc
-#endif
-#ifndef CUTILS_ALLOCATOR_dealloc
-#define CUTILS_ALLOCATOR_dealloc free
-#endif
+#include <cutils/alloc.h>
 
 typedef void *(*alloc_fn_t)(size_t size);
 typedef void *(*realloc_fn_t)(void* buffer, size_t size);
@@ -44,7 +33,9 @@ struct allocator {
 #define ALLOCATOR_INIT_NO_METADATA(_alloc, _realloc, _dealloc) (allocator_t) { .metadata = nullptr, .no_md = { .alloc = _alloc, .realloc = _realloc, .dealloc = _dealloc } }
 #define ALLOCATOR_INIT(...) GET_MACRO(__VA_ARGS__, ALLOCATOR_INIT_NO_METADATA, ALLOCATOR_INIT_METADATA)(__VA_ARGS__)
 
-#define ALLOCATOR_DEFAULT ALLOCATOR_INIT_NO_METADATA(CUTILS_ALLOCATOR_alloc, CUTILS_ALLOCATOR_realloc, CUTILS_ALLOCATOR_dealloc)
+#ifndef CUTILS_NO_STD
+#define ALLOCATOR_DEFAULT ALLOCATOR_INIT_NO_METADATA(CUTILS_alloc, CUTILS_realloc, CUTILS_dealloc)
+#endif
 
 [[maybe_unused]]
 static void* AllocatorAlloc(const allocator_t allocator, const size_t size) {
