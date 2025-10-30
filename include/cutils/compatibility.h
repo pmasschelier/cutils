@@ -13,7 +13,7 @@
 #define NODISCARD
 
 #else
-#define NULL NULL
+#define NULL nullptr
 #define CONSTEXPR constexpr
 #define UNUSED [[maybe_unused]]
 #define NODISCARD [[nodiscard]]
