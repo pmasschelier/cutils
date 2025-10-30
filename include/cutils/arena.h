@@ -85,6 +85,11 @@ static void *arena_allocate(arena_allocator_t *arena, const arena_size_t size) {
   return ret;
 }
 
+UNUSED NODISCARD
+static void *arena_allocate_array(arena_allocator_t *arena, const arena_size_t count, const arena_size_t size) {
+  return arena_allocate(arena, count * size);
+}
+
 UNUSED
 static void arena_reset(arena_allocator_t* arena) {
   for (arena_region_t* r = arena->head; r != NULL; r = r->next)
