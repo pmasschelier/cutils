@@ -39,20 +39,16 @@ static void arena_pop_frame(arena_t* arena, const arena_size_t frame) {
 
 #ifdef CUTILS_ARENA_DYNAMIC
 
-#if defined(CUTILS_NO_STD) && !(defined(CUTILS_malloc) && defined(CUTILS_realloc) && defined(CUTILS_dealloc))
-#error "When the CUTILS_NO_STD and CUTILS_ARENA_DYNAMIC are defined, CUTILS_malloc, CUTILS_realloc and CUTILS_dealloc should be provided"
-#endif
-
 [[maybe_unused]]
 static arena_t arena_init(arena_size_t capacity) {
-  void* memory = CUTILS_malloc(capacity);
+  void* memory = CUTILS_alloc(capacity);
   if (memory == nullptr) capacity = 0;
   return (arena_t){.memory = memory, .capacity = capacity, .size = 0};
 }
 
 [[maybe_unused]]
 static void arena_free(arena_t* arena) {
-  CUTILS_free(arena->memory);
+  CUTILS_dealloc(arena->memory);
   *arena = (arena_t) {
     .memory = nullptr,
     .capacity = 0,

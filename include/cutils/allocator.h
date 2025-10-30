@@ -1,7 +1,7 @@
 #ifndef CUTILS_ALLOCATOR_H
 #define CUTILS_ALLOCATOR_H
 
-#include <cutils/alloc.h>
+#include <stdint.h>
 
 typedef void *(*alloc_fn_t)(size_t size);
 typedef void *(*realloc_fn_t)(void* buffer, size_t size);
@@ -34,6 +34,7 @@ struct allocator {
 #define ALLOCATOR_INIT(...) GET_MACRO(__VA_ARGS__, ALLOCATOR_INIT_NO_METADATA, ALLOCATOR_INIT_METADATA)(__VA_ARGS__)
 
 #ifndef CUTILS_NO_STD
+#include <cutils/alloc.h>
 #define ALLOCATOR_DEFAULT ALLOCATOR_INIT_NO_METADATA(CUTILS_alloc, CUTILS_realloc, CUTILS_dealloc)
 #endif
 

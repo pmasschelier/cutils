@@ -2,7 +2,8 @@ fs = import('fs')
 
 sources = files(
     'arena_static.c',
-    'arena_dynamic.c'
+    'arena_dynamic.c',
+    'basic_array.c',
 )
 
 libtap = dependency('libtap')
