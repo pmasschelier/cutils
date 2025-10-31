@@ -14,7 +14,7 @@
 #endif
 
 #ifndef CUTILS_ARENA_SIZE_TYPE
-#define CUTILS_ARENA_SIZE_TYPE unsigned
+#define CUTILS_ARENA_SIZE_TYPE size_t
 #endif
 
 #ifndef CUTILS_ARENA_DEFAULT_REGION_SIZE
@@ -59,7 +59,7 @@ struct arena_allocator {
 #define ARENA_INIT { NULL, NULL }
 #endif
 
-UNUSED NODISCARD
+NODISCARD
 static void *arena_allocate(arena_allocator_t *arena, const arena_size_t size) {
   // Compute the alignment
   const arena_size_t align = MIN(bits_next_pow2(size), 64);
@@ -108,6 +108,13 @@ static void arena_free(arena_allocator_t* arena) {
 
   arena->head = NULL;
   arena->current = NULL;
+}
+
+static void arena_free_noop(arena_allocator_t*, void*) {}
+
+UNUSED
+static allocator_t arena_get_allocator(arena_size_t* arena) {
+  return ALLOCATOR_INIT_METADATA(arena, (alloc_md_fn_t)arena_allocate, NULL, (dealloc_md_fn_t)arena_free_noop);
 }
 
 typedef struct {
