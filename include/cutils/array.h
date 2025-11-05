@@ -26,7 +26,7 @@
 #endif
 
 #ifndef array_indexof
-#define array_indexof(array, x) (x - array.data)
+#define array_indexof(array, x) ((x) - (array).data)
 #endif
 
 #ifndef EMPTY_ARRAY
