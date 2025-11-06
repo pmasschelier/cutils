@@ -9,7 +9,7 @@
 #include <string.h>
 #endif
 
-#define ring_empty(ring) (!(ring).full && ((ring).begin == (ring).end))
+#define ring_empty(ring) (!(ring).full && ((ring).begin == (ring).next))
 #define ring_next(ring, index) (((index) + 1) % (ring).capacity)
 #define ring_prev(ring, index) (((index) - 1) % (ring).capacity)
 #define ring_count(ring) ((ring).full ? (ring).capacity : (ring).next - (ring).begin)
