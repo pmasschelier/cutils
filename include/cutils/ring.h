@@ -3,15 +3,17 @@
 
 #include <cutils/alloc.h>
 #include <cutils/when_macros.h>
+#include <cutils/minmax.h>
 
 #ifndef CUTILS_NO_STD
 #include <string.h>
 #endif
 
-#define ring_empty(ring) ((ring).begin == (ring).next)
-
 #define ring_next(ring, index) (((index) + 1) % (ring).capacity)
 #define ring_prev(ring, index) (((index) - 1) % (ring).capacity)
+#define ring_count(ring) ((ring).full ? (ring).capacity : (ring).next - (ring).begin)
+#define ring_head(ring, count) ((ring).next = ((ring).begin + MIN(count, ring_count(ring))) % (ring).capacity)
+#define ring_tail(ring, count) ((ring).begin = ((ring).next - MIN(count, ring_count(ring))) % (ring).capacity)
 
 #define DEFINE_RING_TYPE(type)                                                  \
     typedef struct {                                                            \
@@ -40,44 +42,44 @@
         ring->full = false;                                                     \
     }                                                                           \
                                                                                 \
-    UNUSED static type* ring_front_ ## type(type ## _ring_t* ring) {  \
+    UNUSED static type* ring_front_ ## type(type ## _ring_t* ring) {            \
         if(ring_empty(*ring))                                                   \
-            return NULL;                                                     \
+            return NULL;                                                        \
         return &ring->data[ring->begin];                                        \
     }                                                                           \
                                                                                 \
-    UNUSED static bool ring_pop_back_ ## type(                        \
+    UNUSED static bool ring_pop_back_ ## type(                                  \
         type ## _ring_t* ring, type* popped                                     \
     ) {                                                                         \
         if(ring_empty(*ring))                                                   \
             return false;                                                       \
         unsigned last = ring_prev(*ring, ring->next);                           \
-        if(popped != NULL)                                                   \
+        if(popped != NULL)                                                      \
             memcpy(popped, &ring->data[last], sizeof(type));                    \
         ring->next = last;                                                      \
         ring->full = false;                                                     \
         return true;                                                            \
     }                                                                           \
                                                                                 \
-    UNUSED static bool ring_pop_front_ ## type(                       \
+    UNUSED static bool ring_pop_front_ ## type(                                 \
         type ## _ring_t* ring, type* popped                                     \
     ) {                                                                         \
         if(ring_empty(*ring))                                                   \
             return false;                                                       \
-        if(popped != NULL)                                                   \
+        if(popped != NULL)                                                      \
             memcpy(popped, &ring->data[ring->begin], sizeof(type));             \
         ring->begin = ring_next(*ring, ring->begin);                            \
         ring->full = false;                                                     \
         return true;                                                            \
     }                                                                           \
                                                                                 \
-    UNUSED static type* ring_push_back_ ## type(                      \
+    UNUSED static type* ring_push_back_ ## type(                                \
         type ## _ring_t* ring, bool force                                       \
     ) {                                                                         \
         const unsigned next = ring_next(*ring, ring->next);                     \
         if(ring->full) {                                                        \
             if (!force)                                                         \
-                return NULL;                                                 \
+                return NULL;                                                    \
             ring->begin = ring_next(*ring, ring->begin);                        \
         } else if(next == ring->begin) {                                        \
             ring->full = true;                                                  \
