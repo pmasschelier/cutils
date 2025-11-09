@@ -30,6 +30,11 @@
 #define EMPTY_ARRAY { .length = 0, .capacity = 0, .data = NULL }
 #endif
 
+#define DEFINE_SERIALIZED_ARRAY_ALIGNER(type)   \
+    struct aligner {                            \
+        unsigned length;                        \
+        type data[];                            \
+    };
 
 #define DEFINE_ARRAY_TYPE(type)                                                \
     DEFINE_INTERFACE_ARRAY_TYPE(type)                                          \
@@ -202,6 +207,34 @@
             }                                                                   \
         }                                                                       \
         return NULL;                                                            \
+    }                                                                           \
+                                                                                \
+    UNUSED static size_t array_serialized_size_ ## type(                        \
+        type ## _array_t* array                                                 \
+    ) {                                                                         \
+        DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
+        return sizeof(struct aligner) + array->length * sizeof(type);           \
+    }                                                                           \
+                                                                                \
+    UNUSED static void array_serialize_ ## type(                                \
+        char* buffer, const type ## _array_t* array                             \
+    ) {                                                                         \
+        DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
+        *(unsigned*)buffer = array->length;                                     \
+        buffer += sizeof(struct aligner);                                       \
+        memcpy(buffer, array->data, array->length * sizeof(type));              \
+    }                                                                           \
+                                                                                \
+    UNUSED static void array_deserialize_ ## type(                              \
+        type ## _array_t* array, const char* buffer                             \
+    ) {                                                                         \
+        DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
+        unsigned length = *(unsigned*)buffer;                                   \
+        array_free_ ## type(array);                                             \
+        array_append_ ## type(array, length);                                   \
+        memcpy(                                                                 \
+            array->data, buffer + sizeof(struct aligner), length * sizeof(type) \
+        );                                                                      \
     }
 
 #endif //CUTILS_ARRAY_H
