@@ -2,16 +2,9 @@
 #define CUTILS_ARENA_H
 
 #include <cutils/when_macros.h>
-#include <cutils/allocator.h>
+#include <cutils/allocator/allocator.h>
 #include <cutils/bits.h>
-
-#ifndef MIN
-#define MIN(a,b) (a) < (b) ? (a) : (b)
-#endif
-
-#ifndef MAX
-#define MAX(a,b) (a) > (b) ? (a) : (b)
-#endif
+#include <cutils/minmax.h>
 
 #ifndef CUTILS_ARENA_SIZE_TYPE
 #define CUTILS_ARENA_SIZE_TYPE size_t
@@ -31,9 +24,6 @@ struct arena_region {
   arena_size_t used;
   char data[];
 };
-
-#define CUTILS_NEXT_ALLOC_ALIGNED(nextAlloc, align) (((nextAlloc) + ((align) - 1)) & -align)
-#define CUTILS_SIZE
 
 UNUSED NODISCARD
 static arena_region_t* arena_region_allocate(const arena_size_t capacity) {

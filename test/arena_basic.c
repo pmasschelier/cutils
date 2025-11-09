@@ -1,9 +1,7 @@
 #include <string.h>
 #include <tap.h>
-#include <time.h>
 
-#define CUTILS_arena_DYNAMIC
-#include <cutils/arena.h>
+#include <cutils/allocator/arena.h>
 
 CONSTEXPR arena_size_t BUFFER_SIZE = 4321;
 

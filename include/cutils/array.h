@@ -1,17 +1,14 @@
 #ifndef CUTILS_ARRAY_H
 #define CUTILS_ARRAY_H
 
-#include <cutils/alloc.h>
+#include <cutils/allocator/alloc.h>
 #include <cutils/compatibility.h>
+#include <cutils/minmax.h>
 #include <stddef.h>
 #include <assert.h>
 
 #ifndef CUTILS_NO_STD
 #include <string.h>
-#endif
-
-#ifndef MAX
-#define MAX(a,b) (a) > (b) ? (a) : (b)
 #endif
 
 #ifndef ARRAY_MIN_CAPACITY
@@ -46,7 +43,7 @@
     } type ## _array_t;
 
 #define DEFINE_IMPLEMENTATION_ARRAY_TYPE(type)                                  \
-    UNUSED NODISCARD static type *array_append_ ## type(                    \
+    UNUSED NODISCARD static type *array_append_ ## type(                        \
         type ## _array_t *array, unsigned count                                 \
     ) {                                                                         \
         if(count == 0)                                                          \
@@ -68,7 +65,7 @@
         return ret;                                                             \
     }                                                                           \
                                                                                 \
-    UNUSED static bool array_pop_ ## type(                            \
+    UNUSED static bool array_pop_ ## type(                                      \
         type ## _array_t *array, type* value                                    \
     ) {                                                                         \
         if(array->length == 0)                                                  \
@@ -79,7 +76,7 @@
         return true;                                                            \
     }                                                                           \
                                                                                 \
-    UNUSED static type* array_insert_ ## type(                        \
+    UNUSED static type* array_insert_ ## type(                                  \
         type##_array_t *array, const type *item, unsigned index                 \
     ) {                                                                         \
         assert(index <= array->length);                                         \
@@ -93,7 +90,7 @@
         return &array->data[index];                                             \
     }                                                                           \
                                                                                 \
-    UNUSED static bool array_remove_ ## type(                         \
+    UNUSED static bool array_remove_ ## type(                                   \
         type##_array_t *array, const type *item, unsigned index                 \
     ) {                                                                         \
         assert(index < array->length);                                          \
@@ -106,7 +103,7 @@
         return true;                                                            \
     }                                                                           \
                                                                                 \
-    UNUSED static void array_filter_ ## type(                         \
+    UNUSED static void array_filter_ ## type(                                   \
         type##_array_t *array, const bool* remove                               \
     ) {                                                                         \
         unsigned start = 0, blockSize = 0;                                      \
@@ -124,7 +121,7 @@
         }                                                                       \
     }                                                                           \
                                                                                 \
-    UNUSED static void array_swap_and_pop_back_ ## type(              \
+    UNUSED static void array_swap_and_pop_back_ ## type(                        \
         type ## _array_t *array, unsigned index                                 \
     ) {                                                                         \
         assert(index < array->length);                                          \
@@ -137,14 +134,14 @@
                sizeof(type));                                                   \
     }                                                                           \
                                                                                 \
-    UNUSED static void array_free_##type(type##_array_t *array) {     \
+    UNUSED static void array_free_##type(type##_array_t *array) {               \
         free(array->data);                                                      \
         array->length = 0;                                                      \
         array->capacity = 0;                                                    \
         array->data = NULL;                                                     \
     }                                                                           \
                                                                                 \
-    UNUSED static type ## _array_t array_shallow_clone_ ## type(      \
+    UNUSED static type ## _array_t array_shallow_clone_ ## type(                \
         const type##_array_t *array                                             \
     ) {                                                                         \
         type* copy = malloc(array->capacity * sizeof(type));                    \
@@ -184,7 +181,7 @@
         return array_insert_##type(array, x, mid);                              \
     }                                                                           \
                                                                                 \
-    UNUSED static type* array_find_sorted_ ## type(                   \
+    UNUSED static type* array_find_sorted_ ## type(                             \
         const type ## _array_t* array, compare_ ## type ## _fn fn, type* x      \
     ) {                                                                         \
         if (array->length == 0                                                  \

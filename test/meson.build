@@ -4,6 +4,8 @@ sources = files(
     'arena_basic.c',
     'array_basic.c',
     'bump_basic.c',
+    'bits_basic.c',
+    'ring_basic.c'
 )
 
 libtap = dependency('libtap')

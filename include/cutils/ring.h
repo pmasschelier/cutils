@@ -1,9 +1,10 @@
 #ifndef CUTILS_RING_H
 #define CUTILS_RING_H
 
-#include <cutils/alloc.h>
+#include <cutils/allocator/alloc.h>
 #include <cutils/when_macros.h>
 #include <cutils/minmax.h>
+#include <cutils/compatibility.h>
 
 #ifndef CUTILS_NO_STD
 #include <string.h>

@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <cutils/compatibility.h>
 
+#define CUTILS_NEXT_ALLOC_ALIGNED(nextAlloc, align) (((nextAlloc) + ((align) - 1)) & -align)
+
 typedef void *(*alloc_fn_t)(size_t size);
 typedef void *(*realloc_fn_t)(void* buffer, size_t size);
 typedef void (*dealloc_fn_t)(void* buffer);
@@ -35,7 +37,10 @@ struct allocator {
 #define ALLOCATOR_INIT(...) GET_MACRO(__VA_ARGS__, ALLOCATOR_INIT_NO_METADATA, ALLOCATOR_INIT_METADATA)(__VA_ARGS__)
 
 #ifndef CUTILS_NO_STD
-#include <cutils/alloc.h>
+#include <cutils/allocator/alloc.h>
+// static void* cutils_alloc(void*, const size_t size) { return CUTILS_alloc(size); }
+// static void* cutils_realloc(void*, void* ptr, const size_t size) { return CUTILS_realloc(ptr, size); }
+// static void cutils_dealloc(void*, void* ptr) { CUTILS_dealloc(ptr); }
 #define ALLOCATOR_DEFAULT ALLOCATOR_INIT_NO_METADATA(CUTILS_alloc, CUTILS_realloc, CUTILS_dealloc)
 #endif
 

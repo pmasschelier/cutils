@@ -1,7 +1,7 @@
 #include <string.h>
 #include <tap.h>
 #include <time.h>
-#include <cutils/bump.h>
+#include <../include/cutils/allocator/bump.h>
 
 #define BUFFER_SIZE 4321
 char buf[BUFFER_SIZE];
