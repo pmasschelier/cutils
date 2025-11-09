@@ -225,7 +225,7 @@
         memcpy(buffer, array->data, array->length * sizeof(type));              \
     }                                                                           \
                                                                                 \
-    NODISCARD UNUSED static void array_deserialize_ ## type(                    \
+    NODISCARD UNUSED static bool array_deserialize_ ## type(                    \
         type ## _array_t* array, const char* buffer                             \
     ) {                                                                         \
         DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
