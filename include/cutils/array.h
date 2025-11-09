@@ -210,7 +210,7 @@
     }                                                                           \
                                                                                 \
     UNUSED static size_t array_serialized_size_ ## type(                        \
-        type ## _array_t* array                                                 \
+        const type ## _array_t* array                                           \
     ) {                                                                         \
         DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
         return sizeof(struct aligner) + array->length * sizeof(type);           \
@@ -225,16 +225,16 @@
         memcpy(buffer, array->data, array->length * sizeof(type));              \
     }                                                                           \
                                                                                 \
-    UNUSED static void array_deserialize_ ## type(                              \
+    NODISCARD UNUSED static void array_deserialize_ ## type(                    \
         type ## _array_t* array, const char* buffer                             \
     ) {                                                                         \
         DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
         unsigned length = *(unsigned*)buffer;                                   \
         array_free_ ## type(array);                                             \
-        array_append_ ## type(array, length);                                   \
-        memcpy(                                                                 \
-            array->data, buffer + sizeof(struct aligner), length * sizeof(type) \
-        );                                                                      \
+        type* data = array_append_ ## type(array, length);                      \
+        if (data != NULL) return false;                                         \
+        memcpy(data, buffer + sizeof(struct aligner), length * sizeof(type));   \
+        return true;                                                            \
     }
 
 #endif //CUTILS_ARRAY_H
