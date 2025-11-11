@@ -6,7 +6,7 @@
 DEFINE_ARRAY_TYPE(char)
 typedef char_array_t string_t;
 
-#define string_view(c_str) (string_view_t) { .str = str, .len = strlen(str) }
+#define string_view(c_str) (string_view_t) { .str = c_str, .len = strlen(c_str) }
 #define string_free array_free_char
 #define EMPTY_STRING_VIEW (string_view_t) { .str = "", .len = 0 }
 
