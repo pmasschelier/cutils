@@ -4,7 +4,7 @@
 DEFINE_ARRAY_TYPE(int)
 
 int main(void) {
-    int_array_t array = EMPTY_ARRAY;
+    int_array_t array = EMPTY_ARRAY(int);
     cmp_ok(array.capacity, "==", 0, "Initial capacity is 0");
     cmp_ok(array.length, "==", 0, "Initial length is 0");
     ok(array.data == NULL, "Initial data is NULL");

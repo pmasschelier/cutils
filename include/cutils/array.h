@@ -28,7 +28,7 @@
 #endif
 
 #ifndef EMPTY_ARRAY
-#define EMPTY_ARRAY { .length = 0, .capacity = 0, .data = NULL }
+#define EMPTY_ARRAY(type) (type ## _array_t) { .length = 0, .capacity = 0, .data = NULL }
 #endif
 
 #define DEFINE_SERIALIZED_ARRAY_ALIGNER(type)   \
