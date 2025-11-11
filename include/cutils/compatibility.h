@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #define CONSTEXPR const
+#define ALIGNOF _Alignof
 #ifdef __GNUC__
 #define UNUSED __attribute__((unused))
 #else
@@ -17,6 +18,7 @@
 #define NULL nullptr
 #endif
 #define CONSTEXPR constexpr
+#define ALIGNOF alignof
 #define UNUSED [[maybe_unused]]
 #define NODISCARD [[nodiscard]]
 #endif

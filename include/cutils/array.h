@@ -5,6 +5,7 @@
 #include <cutils/compatibility.h>
 #include <cutils/minmax.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <assert.h>
 
 #ifndef CUTILS_NO_STD
@@ -216,19 +217,22 @@
         return sizeof(struct aligner) + array->length * sizeof(type);           \
     }                                                                           \
                                                                                 \
-    UNUSED static void array_serialize_ ## type(                                \
+    UNUSED static bool array_serialize_ ## type(                                \
         char* buffer, const type ## _array_t* array                             \
     ) {                                                                         \
         DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
+        if((intptr_t)buffer & (ALIGNOF(unsigned) - 1)) return false;            \
         *(unsigned*)buffer = array->length;                                     \
         buffer += sizeof(struct aligner);                                       \
         memcpy(buffer, array->data, array->length * sizeof(type));              \
+        return true;                                                            \
     }                                                                           \
                                                                                 \
     NODISCARD UNUSED static bool array_deserialize_ ## type(                    \
         type ## _array_t* array, const char* buffer                             \
     ) {                                                                         \
         DEFINE_SERIALIZED_ARRAY_ALIGNER(type)                                   \
+        if((intptr_t)buffer & (ALIGNOF(unsigned) - 1)) return false;            \
         unsigned length = *(unsigned*)buffer;                                   \
         array_free_ ## type(array);                                             \
         type* data = array_append_ ## type(array, length);                      \
